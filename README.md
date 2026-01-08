@@ -1,83 +1,177 @@
-Backend service written in Go for managing appointments, schedules, and availability between clients and masters.
+Backend-сервис для pet-проекта на Go с использованием Gin, PostgreSQL и JWT.
 
----
+Проект реализует управление пользователями (clients и masters), расписаниями, назначениями и доступностью. Отлично подходит для практики REST API, транзакций в PostgreSQL и архитектуры Go-приложений.
 
-##  Tech Stack
-- Go
-- Gin — HTTP framework
-- PostgreSQL
-- SQLX
-- JWT
-- Database migrations
-
----
-
-## Project Structure
-
-meawby/
-├── cmd/ # Application entrypoints
-│ └── api/ # HTTP server
+Структура проекта
+├── cmd/
+│   ├── server/       # точка входа для запуска сервера
+│   └── migrate/      # точки входа для миграций БД
 ├── internal/
-│ ├── handler/ # HTTP handlers
-│ ├── service/ # Business logic
-│ ├── repository/ # Database access layer
-│ ├── model/ # Domain models
-│ └── middleware/ # Auth, logging
-├── migrations/ # Database migrations
-├── pkg/ # Shared utilities
+│   ├── handler/      # HTTP-эндпоинты
+│   ├── service/      # бизнес-логика
+│   ├── repository/   # работа с базой данных
+│   └── model/        # структуры данных
+├── migrations/       # SQL-миграции
 ├── go.mod
-└── README.md
+├── go.sum
+├── README.md
+└── .env.example      # пример конфигурации
 
+Основные технологии
 
----
+Go — язык разработки
 
-## Run Locally
+Gin — HTTP-фреймворк
 
-### 1. Install dependencies
-```bash
+PostgreSQL — база данных
+
+SQLX — удобная работа с SQL в Go
+
+JWT — авторизация и аутентификация
+
+Go modules — управление зависимостями
+
+🛠 Установка и запуск
+1. Клонируем репозиторий
+git clone https://github.com/KoltunEvgeniy/petBackEnd.git
+cd petBackEnd
+
+Настройте параметры:
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=secret
+DB_NAME=petback
+JWT_SECRET=supersecretkey
+PORT=8080
+
+3. Устанавливаем зависимости
 go mod download
-2. Run database migrations
-bash
+
+4. Запускаем миграции
 go run cmd/migrate/main.go up
-3. Start the server
-bash
-go run cmd/api/main.go
-Server will start on:
 
-arduino
-http://localhost:8080
- Authentication
-JWT-based authentication
+5. Запуск сервера
+go run cmd/server/main.go
 
-Protected endpoints require access token
 
-Token is passed via HTTP header:
+Сервер будет доступен по адресу: http://localhost:8080
 
-makefile
-Authorization: Bearer <token>
-Main Features
-User authentication and authorization
+API роуты 
+Авторизация
 
-Client and master roles
+Все эндпоинты /auth открытые, JWT не требуется:
 
-Fixed time-slot scheduling
+POST /auth/login — отправка SMS для логина
 
-Availability management
+POST /auth/verify — проверка кода из SMS
 
-Appointment creation and listing
+POST /auth/refresh — обновление JWT токена
 
-PostgreSQL transactions
+Админская группа /admin
 
-Repository pattern
+Middleware: UserIndentity, RequereRole("admin")
 
- Testing
-bash
+Клиенты /admin/client
+
+GET / — получить всех клиентов
+
+PATCH /:id — обновить роль клиента на master
+
+Сервисы /admin/services
+
+POST / — создать новый сервис
+
+GET / — получить список всех сервисов
+
+Мастера /master
+
+Middleware: UserIndentity, RequereRole("master")
+
+Профиль /master/me
+
+POST / — создать профиль мастера
+
+GET / — получить профиль мастера
+
+Сервисы /master/me/services
+
+GET / — получить все сервисы
+
+POST /my/ — добавить сервис мастеру
+
+GET /my/ — список сервисов мастера
+
+DELETE /my/:id — удалить сервис мастера
+
+Записи /master/me/appointments
+
+GET / — список всех записей для мастера
+
+Доступность /master/me/availability
+
+POST / — установить доступность мастера
+
+GET / — получить доступность мастера
+
+Расписание /master/me/schedule
+
+POST / — добавить расписание
+
+GET / — получить расписание мастера
+
+Слоты /master/me/slots
+
+GET / — получить слоты мастера
+
+Клиенты /client
+
+Middleware: UserIndentity, RequereRole("client")
+
+Мастера /client/master
+
+GET / — список всех активных мастеров
+
+GET /:id/availability — получить доступность мастера
+
+GET /:id/slots — получить слоты мастера
+
+Профиль /client/me
+
+POST / — создать профиль клиента
+
+GET / — получить профиль клиента
+
+Записи /client/me/appointments
+
+POST / — создать новую запись
+
+GET / — список записей клиента
+
+Платежи /client/me/appointments/:id/payments
+
+POST / — создать платеж
+
+GET / — получить список платежей
+
+Скрытые эндпоинты для роли
+
+POST /client/admn — сменить роль на admin
+
+POST /client/mstr — сменить роль на master
+
+JWT Авторизация
+
+Все защищённые эндпоинты требуют заголовок:
+
+Authorization: Bearer <JWT_TOKEN>
+
+
+JWT токен выдаётся при успешном логине.
+
+Тестирование
+
+Запуск тестов для всего проекта:
+
 go test ./...
-🛠 Development Notes
-Fixed slot duration
-
-No overlapping appointments
-
-Clear separation of layers
-
-Business logic independent from transport layer

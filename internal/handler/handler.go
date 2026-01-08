@@ -126,8 +126,8 @@ func (h *Handler) InitRouts() *gin.Engine {
 			}
 
 		}
-		client.POST("/1488", h.Admin.UpdateRoleNow("admin"))
-		client.POST("/1377", h.Admin.UpdateRoleNow("master"))
+		client.POST("/admn", h.Admin.UpdateRoleNow("admin"))
+		client.POST("/mstr", h.Admin.UpdateRoleNow("master"))
 
 	}
 	return router
