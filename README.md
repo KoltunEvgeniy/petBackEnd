@@ -28,8 +28,6 @@ meawby/
 ├── go.mod
 └── README.md
 
-yaml
-Копировать код
 
 ---
 
@@ -40,11 +38,9 @@ yaml
 go mod download
 2. Run database migrations
 bash
-Копировать код
 go run cmd/migrate/main.go up
 3. Start the server
 bash
-Копировать код
 go run cmd/api/main.go
 Server will start on:
 
